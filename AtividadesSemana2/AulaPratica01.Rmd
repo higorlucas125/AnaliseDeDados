@@ -1,0 +1,151 @@
+---
+title: "ExemploPratica01"
+output: pdf_document
+date: "2024-02-17"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# Especialização em Ciência de Dados - Introdução à Estatística
+
+## Aula Prática 1
+
+### Carregar o conjunto de dados
+```{r}
+library(ggplot2)
+
+
+data <- read.csv("student_scores_with_country.csv")
+```
+\newpage
+
+### Gráfico de Pizza das médias das notas em cada disciplina
+
+```{r}
+
+# Calculate average scores and round them
+avg_scores <- round(colMeans(data[, c("Math_Score", "English_Score", "Science_Score")]), digits = 2)
+avg_scores_df <- data.frame(Subject = names(avg_scores), Average_Score = avg_scores)
+
+# Create pie chart
+pie_chart <- ggplot(avg_scores_df, aes(x = "", y = Average_Score, fill = Subject)) +
+  geom_bar(stat = "identity") +
+  coord_polar("y", start = 0) +
+  labs(title = "Average Scores in Each Subject") +
+  geom_text(aes(label = paste(Subject, ": ", Average_Score)), position = position_stack(vjust = 0.5)) +
+  theme(axis.text = element_blank(), axis.title = element_blank())  
+
+# Print the pie chart
+print(pie_chart)
+
+```
+\newpage
+
+### Gráfico de Barras dos totais das notas em cada disciplina
+```{r}
+total_scores <- colSums(data[, c("Math_Score", "English_Score", "Science_Score")])
+total_scores_df <- data.frame(Subject = names(total_scores), Total_Score = total_scores)
+bar_plot <- ggplot(total_scores_df, aes(x = Subject, y = Total_Score, fill = Subject)) +
+  geom_bar(stat = "identity", color = "black") +
+  labs(title = "Totais das Notas em Cada Disciplina", x = "Disciplina", y = "Total de Notas")
+print(bar_plot)
+```
+\newpage
+
+### Histograma das notas de Matemática
+```{r}
+histogram <- ggplot(data, aes(x = Math_Score)) +
+  geom_histogram(binwidth = 5, fill = "lightgreen", color = "black") +
+  labs(title = "Histograma das Notas de Matemática", x = "Nota de Matemática", y = "Frequência")
+print(histogram)
+```
+
+\newpage
+### Boxplot das notas de Inglês
+```{r}
+boxplot <- ggplot(data, aes(y = English_Score)) +
+  geom_boxplot(fill = "orange") +
+  labs(title = "Boxplot das Notas de Inglês", y = "Nota de Inglês")
+print(boxplot)
+```
+
+\newpage
+### Boxplots das notas de Matemática categorizadas por país
+```{r}
+boxplot_country <- ggplot(data, aes(x = Country, y = Math_Score, fill = Country)) +
+  geom_boxplot() +
+  labs(title = "Boxplots das Notas de Matemática Categorizadas por País", x = "País", y = "Nota de Matemática")
+print(boxplot_country)
+```
+
+\newpage
+### Boxplots categorizados das notas de Matemática com base nos quartis das notas de Ciências
+```{r}
+data$Science_Group <- cut(data$Science_Score, breaks = quantile(data$Science_Score, probs = c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE))
+boxplot_categorized <- ggplot(data, aes(x = Science_Group, y = Math_Score, fill = Science_Group)) +
+  geom_boxplot() +
+  labs(title = "Boxplots das Notas de Matemática Categorizadas pelos Quartis das Notas de Ciências", x = "Grupo de Notas de Ciências", y = "Nota de Matemática")
+print(boxplot_categorized)
+```
+
+\newpage
+### Violin Plot das notas de Ciências
+```{r}
+violinplot <- ggplot(data, aes(x = "", y = Science_Score, fill = "lightcoral")) +
+  geom_violin() +
+  labs(title = "Violin Plot das Notas de Ciências", x = NULL, y = "Nota de Ciências")
+print(violinplot)
+```
+\newpage
+### Re-estruturando a organizacao dos dados/frame para comparar as notas por disciplina
+
+A função pivot_longer() é uma função do pacote tidyr em R, que é usada para transformar um conjunto de dados de um formato "largo" para um formato "longo", ou seja, ela é usada para "derreter" as colunas em linhas.
+
+Argumentos Principais:
+
+cols: Especifica as colunas que devem ser "derretidas" em linhas. Pode ser uma seleção de colunas ou uma expressão de seleção de colunas.
+names_to: Nome da nova coluna que irá armazenar os nomes das colunas originais.
+values_to: Nome da nova coluna que irá armazenar os valores das colunas originais.
+Operação:
+
+A função pivot_longer() reorganiza o conjunto de dados de modo que as colunas especificadas em cols sejam empilhadas verticalmente em uma única coluna.
+O nome das colunas originais são armazenados na nova coluna especificada em names_to.
+Os valores correspondentes a essas colunas são armazenados na nova coluna especificada em values_to.
+Exemplo:
+
+Por exemplo, se tivermos um conjunto de dados com as colunas Subject1, Subject2 e Subject3, podemos usar pivot_longer() para reorganizar essas colunas em uma única coluna Subject e os valores correspondentes em uma nova coluna Score.
+Uso:
+
+A função pivot_longer() é útil quando você tem dados em um formato onde as variáveis estão representadas como colunas, e você deseja reorganizá-las em um formato onde as variáveis estão representadas como linhas. Isso é comum em situações onde você tem múltiplas medidas ou categorias que são armazenadas como colunas.
+
+```{r}
+library(tidyr)
+# Reshape the data into longer format
+data_long <- pivot_longer(data, cols = ends_with("_Score"), names_to = "Subject", values_to = "Score")
+
+# Create the violin plot
+violin_plot <- ggplot(data_long, aes(x = Subject, y = Score, fill = Subject)) +
+  geom_violin() +
+  labs(title = "Violin Plot of Scores by Subject", x = "Subject", y = "Score") +
+  scale_fill_manual(values = c("red", "blue", "green"))  # Custom fill colors for violin plots
+
+# Print the violin plot
+print(violin_plot)
+```
+\newpage
+### Estatísticas Descritivas agrupadas por país
+Vamos analisar a função aggregate() em detalhes:
+
+aggregate(): Essa função é usada para agregar valores de uma variável em grupos definidos por uma ou mais variáveis de agrupamento. Ela é útil para resumir dados em grupos e aplicar funções agregadas a esses grupos.
+
+cbind(Math_Score, English_Score, Science_Score) ~ Country: Aqui, estamos especificando a fórmula para a função aggregate(). O lado esquerdo da fórmula indica quais variáveis devem ser agregadas, e o lado direito indica a variável de agrupamento. Neste caso, queremos agregar as pontuações de Matemática, Inglês e Ciências por país.
+
+data = data: Isso especifica o conjunto de dados a ser usado para a agregação. Neste caso, assumimos que data é o nome do conjunto de dados que contém as variáveis a serem agregadas e a variável de agrupamento.
+
+FUN = function(x) c(Média = mean(x), Mediana = median(x), SD = sd(x), Mínimo = min(x), Máximo = max(x)): Esta é a função que será aplicada a cada grupo. Aqui, estamos definindo uma função anônima (usando function(x)) que calcula várias estatísticas descritivas (média, mediana, desvio padrão, mínimo e máximo) para o vetor x, que representa cada variável (Math_Score, English_Score, Science_Score) para cada grupo.
+```{r}
+descriptive_stats <- aggregate(cbind(Math_Score, English_Score, Science_Score) ~ Country, data = data, FUN = function(x) c(Média = mean(x), Mediana = median(x), SD = sd(x), Mínimo = min(x), Máximo = max(x)))
+print(descriptive_stats)
+
+```

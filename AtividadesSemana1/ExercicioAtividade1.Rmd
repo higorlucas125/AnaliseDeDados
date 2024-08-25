@@ -1,0 +1,89 @@
+---
+title: "Aula 01 - 12/08/2024 Exercicio 1"
+output:
+  pdf_document: default
+  html_notebook: default
+---
+
+1 - Crie um vetor numérico vetor contendo os valores 5,10,15,20,25, Exiba o vetor
+
+```{r}
+createVetor <- c(5,10,15,20,25)
+createVetor
+
+# Test vetor new mod create using seq 
+
+createVetorNew <- seq(from=5,to=25,by=5)
+createVetorNew
+
+
+```
+
+2 - Usando o vetor criado no exercicio 1. adicione 5 a cada elemento do vetor e exiba o resultado 
+
+```{r}
+sunVetorMoreFive <- createVetor + 5
+sunVetorMoreFive
+```
+
+3 - Utilizando o vetor craido no exercico 1, selecione e exiba o terceiro elemento
+
+```{r}
+findThreeElementoOfVetor <- createVetor[3]
+findThreeElementoOfVetor
+```
+
+4 - Crie um data frame df com duas colunas Nome  e idade 
+
+```{r}
+Nome <- c("Ana","Bruno","Carlos")
+Idade <- c(23,25,30)
+
+df <- data.frame(Nome,Idade)
+df
+```
+
+5 - Usando o data frame df criado no exercício 4, selecione e exiba apenas a coluna idade.
+
+```{r}
+columAge <- df["Idade"]
+
+columAge
+
+```
+
+6 - Utilizando o data frame df criado no exercicio 4, selecione e exiba as linhas onde a idade é maior que 24
+
+```{r}
+columnsAgenMoreTwentyFour <- df[df$Idade > 24, ]
+columnsAgenMoreTwentyFour
+
+```
+7 - Adicione uma nova coluna chamanda Cidade ao data frame df, contendo os valores "São Paulo","Rio de Janeiro","Belo Horizonte". Exbia o Data Frame resultante
+
+```{r}
+Cidade <- c("São Paulo","Rio de Janeiro","Belo Horizonte")
+df$Cidade <- Cidade
+df
+```
+8 - Usando o data frame df, adicione 1 à coluna Idade e exiba o data frame resultante.
+
+```{r}
+df$Idade <- df$Idade + 1
+df
+```
+
+9 -  Calcule e exbia a média da coluna idade do data frame df.
+
+```{r}
+media <- mean(df$Idade)
+media
+
+```
+
+10 - Ordene o data frame df pela coluna Idade em ordem descrecente e exiba o resultado
+
+```{r}
+df <- df[order(-df$Idade),]
+df
+```
