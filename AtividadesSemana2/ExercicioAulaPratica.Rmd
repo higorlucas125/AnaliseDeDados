@@ -1,0 +1,206 @@
+---
+title: "AulaPratica02"
+author: "higor lucas de Araujo Freitas"
+date: "2024-08-25"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Carregar o conjunto de dados
+```{r}
+library(ggplot2)
+
+
+data_patient <- read.csv("patient_data.csv")
+```
+\newpage
+
+```{r}
+colnames(data_patient)
+
+# CREATE DATASET SOMENTE PARA ANALISE 
+
+df <- data_patient[,c("Colesterol","PressaoSistolica","PressaoDiastolica","Glicose")]
+```
+
+### Gráfico de Pizza das médias dos indicadores de Saúde Cardiometabólica
+
+```{r}
+# Calcular a media dos scores 
+avg_scores <- round(colMeans(df), digits = 2)
+avg_scores_df <- data.frame(Subject = names(avg_scores), Average_Score=avg_scores)
+
+# Crair o grafico de pizza
+pie_chart <- ggplot(avg_scores_df, aes(x = "", y= Average_Score, fill= Subject)) + 
+  geom_bar(stat="identity") + 
+  coord_polar("y", start = 0 ) +
+  labs(title =  "Pontuação media de cada indicadores Cardiometabólica") + 
+  geom_text(aes(label= paste(Subject, ":",Average_Score)), position= position_stack(vjust = 0.5)) +
+  theme(axis.text = element_blank(), axis.title = element_blank())
+#Print
+print(pie_chart)
+```
+\newpage
+### Gráfico de Barras dos totais dos indicadores Cardiometabólica
+
+```{r}
+total_scores <- colSums(df)
+totla_score_df <- data.frame(Subject = names(total_scores), Total_Score = total_scores)
+bar_plot <- ggplot(totla_score_df, aes(x= Subject, y= Total_Score, fill = Subject))+
+  geom_bar(stat= "identity", color = "black")+
+  labs(title = "Totais dos valores de cada indicadores cardiometabólica", x="Cardiometabólica", y="Total")
+print(bar_plot)
+```
+\newpage
+### Histograma dos valores de Colesterol
+```{r}
+histogram_colesterol <- ggplot(df, aes(x = Colesterol)) +
+  geom_histogram(binwidth = 5, fill = "lightgreen", color = "black") +
+  labs(title = "Histograma dos valores de Colesterol", x = "Valores de Colesterol", y = "Frequência")
+print(histogram_colesterol)
+```
+### Histograma dos valores de Glicose
+```{r}
+histogram_glicose <- ggplot(df, aes(x = Glicose)) +
+  geom_histogram(binwidth = 5, fill = "lightgreen", color = "black") +
+  labs(title = "Histograma dos valores de Glicose", x = "Valores de Glicose", y = "Frequência")
+print(histogram_glicose)
+```
+### Histograma dos valores de PressaoDiastolica
+```{r}
+histogram_PressaoDiastolica <- ggplot(df, aes(x = PressaoDiastolica)) +
+  geom_histogram(binwidth = 5, fill = "lightgreen", color = "black") +
+  labs(title = "Histograma dos valores de PressaoDiastolica", x = "Valores de PressaoDiastolica", y = "Frequência")
+print(histogram_PressaoDiastolica)
+```
+### Histograma dos valores de PressaoSistolica
+```{r}
+histogram_PressaoSistolica <- ggplot(df, aes(x = PressaoSistolica)) +
+  geom_histogram(binwidth = 5, fill = "lightgreen", color = "black") +
+  labs(title = "Histograma dos valores de PressaoSistolica", x = "Valores de PressaoSistolica", y = "Frequência")
+print(histogram_PressaoSistolica)
+```
+\newpage
+### Boxplot dos valores Colesterol
+```{r}
+boxplot_Colesterol <- ggplot(df, aes(y = Colesterol)) +
+  geom_boxplot(fill = "orange") +
+  labs(title = "Boxplot dos valores Colesterol", y = "Valores de Colesterol")
+print(boxplot_Colesterol)
+```
+### Boxplot dos valores Glicose
+```{r}
+boxplot_Glicose <- ggplot(df, aes(y = Glicose)) +
+  geom_boxplot(fill = "red") +
+  labs(title = "Boxplot dos valores Glicose", y = "Valores de Glicose")
+print(boxplot_Glicose)
+```
+### Boxplot dos valores PressaoDiastolica
+```{r}
+boxplot_PressaoDiastolica <- ggplot(df, aes(y = PressaoDiastolica)) +
+  geom_boxplot(fill = "blue") +
+  labs(title = "Boxplot dos valores PressaoDiastolica", y = "Valores de PressaoDiastolica")
+print(boxplot_PressaoDiastolica)
+```
+### Boxplot dos valores PressaoSistolica
+```{r}
+boxplot_PressaoSistolica <- ggplot(df, aes(y = PressaoSistolica)) +
+  geom_boxplot(fill = "green") +
+  labs(title = "Boxplot dos valores PressaoSistolica", y = "Valores de PressaoSistolica")
+print(boxplot_PressaoSistolica)
+```
+\newpage
+### Boxplots das valores de Colesterol categorizadas por sexo
+```{r}
+boxplot_country_colesterol <- ggplot(data_patient, aes(x = Sexo, y = Colesterol, fill = Sexo)) +
+  geom_boxplot() +
+  labs(title = "Boxplots dos Valores de Colesterol Categorizadas por sexo", x = "Sexo", y = "Valores do Colesterol")
+print(boxplot_country_colesterol)
+```
+
+### Boxplots das valores de Glicose categorizadas por sexo
+```{r}
+boxplot_country_glicose <- ggplot(data_patient, aes(x = Sexo, y = Glicose, fill = Sexo)) +
+  geom_boxplot() +
+  labs(title = "Boxplots dos Valores de Glicose Categorizadas por sexo", x = "Sexo", y = "Valores do Glicose")
+print(boxplot_country_glicose)
+```
+
+### Boxplots das valores de PressaoDiastolica categorizadas por sexo
+```{r}
+boxplot_country_pressaoDiastolica <- ggplot(data_patient, aes(x = Sexo, y = PressaoDiastolica, fill = Sexo)) +
+  geom_boxplot() +
+  labs(title = "Boxplots dos Valores de PressaoDiastolica Categorizadas por sexo", x = "Sexo", y = "Valores do PressaoDiastolica")
+print(boxplot_country_pressaoDiastolica)
+```
+
+
+### Boxplots das valores de PressaoSistolica categorizadas por sexo
+```{r}
+boxplot_country_pressaoSistolica <- ggplot(data_patient, aes(x = Sexo, y = PressaoSistolica, fill = Sexo)) +
+  geom_boxplot() +
+  labs(title = "Boxplots dos Valores de PressaoSistolica Categorizadas por sexo", x = "Sexo", y = "Valores do PressaoSistolica")
+print(boxplot_country_pressaoSistolica)
+```
+\newpage
+### Violin Plot dos valores de Colesterol
+```{r}
+violinplot_colesterol <- ggplot(data_patient, aes(x = "", y = Colesterol, fill = "lightcoral")) +
+  geom_violin() +
+  labs(title = "Violin Plot dos valores de Colesterol", x = NULL, y = "Valores de Colesterol")
+print(violinplot_colesterol)
+```
+
+### Violin Plot dos valores de Glicose
+```{r}
+violinplot_colesterol <- ggplot(data_patient, aes(x = "", y = Glicose, fill = "lightcoral")) +
+  geom_violin() +
+  labs(title = "Violin Plot dos valores de Glicose", x = NULL, y = "Valores de Glicose")
+print(violinplot_colesterol)
+```
+### Violin Plot dos valores de PressaoDiastolica
+```{r}
+violinplot_colesterol <- ggplot(data_patient, aes(x = "", y = PressaoDiastolica, fill = "lightcoral")) +
+  geom_violin() +
+  labs(title = "Violin Plot dos valores de PressaoDiastolica", x = NULL, y = "Valores de PressaoDiastolica")
+print(violinplot_colesterol)
+```
+### Violin Plot dos valores de PressaoSistolica
+```{r}
+violinplot_colesterol <- ggplot(data_patient, aes(x = "", y = PressaoSistolica, fill = "lightcoral")) +
+  geom_violin() +
+  labs(title = "Violin Plot dos valores de PressaoSistolica", x = NULL, y = "Valores de PressaoSistolica")
+print(violinplot_colesterol)
+```
+\newpage
+```{r}
+library(tidyr)
+# Reshape the data into longer format
+data_long <- pivot_longer(data_patient, cols = colnames(df) , names_to = "Subject", values_to = "Score")
+
+# Create the violin plot
+violin_plot <- ggplot(data_long, aes(x = Subject, y = Score, fill = Subject)) +
+  geom_violin() +
+  labs(title = "Violin Plot of Scores by Cardiometabolic", x = "Cardiometabolic", y = "Score") +
+  scale_fill_manual(values = c("red", "blue", "green","yellow"))  # Custom fill colors for violin plots
+
+# Print the violin plot
+print(violin_plot)
+```
+\newpage
+### Estatísticas Descritivas agrupadas por sexo
+```{r}
+descriptive_stats_sexo <- aggregate(cbind(Colesterol,Glicose,PressaoDiastolica,PressaoSistolica) ~ Sexo, data = data_patient, FUN = function(x) c(Média = mean(x), Mediana = median(x), SD = sd(x), Mínimo = min(x), Máximo = max(x)))
+print(descriptive_stats_sexo)
+
+```
+### Estatísticas Descritivas agrupadas por idade
+```{r}
+descriptive_stats_age <- aggregate(cbind(Colesterol,Glicose,PressaoDiastolica,PressaoSistolica) ~ Idade, data = data_patient, FUN = function(x) c(Média = mean(x), Mediana = median(x), SD = sd(x), Mínimo = min(x), Máximo = max(x)))
+print(descriptive_stats_age)
+
+```
+
