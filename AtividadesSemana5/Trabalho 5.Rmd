@@ -1,0 +1,143 @@
+---
+title: "Trabalho 5"
+author: "higor lucas de Araujo Freitas"
+date: "2024-09-21"
+output: pdf_document
+---
+
+# Introdução
+
+Um fisioterapeuta está interessado em avaliar a eficácia de um novo tratamento de reabilitação para pacientes com dor lombar. Para isso, mediu a intensidade da dor (em uma escala de 0 a 10) nos pacientes antes e depois do tratamento. Dados:
+
+Intensidade da dor antes do tratamento para 15 pacientes.
+
+Intensidade da dor após o tratamento para os mesmos 15 pacientes.
+
+```{r}
+
+dor_antes <- c(7, 8, 6, 7.5, 8, 7, 6.5, 7, 8, 7.5, 6, 7, 8, 7.5, 6.5)
+dor_depois <- c(5, 6, 5, 6, 5.5, 5, 5.5, 6, 6.5, 6, 5, 6, 6.5, 6, 5.5)
+
+```
+
+
+### Objetivo: Determinar se o tratamento teve um efeito significativo na redução da dor dos pacientes.
+
+### Hipótese Nula (H0): Não há diferença na mediana da intensidade da dor antes e depois do tratamento.
+
+### Hipótese Alternativa (H1): Há uma diferença na mediana da intensidade da dor antes e depois do tratamento.
+
+```{r}
+dor_antes <- c(7, 8, 6, 7.5, 8, 7, 6.5, 7, 8, 7.5, 6, 7, 8, 7.5, 6.5)
+
+# Teste de Shapiro-Wilk
+shapiro.test(dor_antes)
+```
+```{r}
+# Histograma
+hist(dor_antes, main="Histograma de dor_antes", xlab="Intensidade da Dor", ylab="Frequência", col="skyblue", border="black")
+
+# Gráfico Q-Q
+qqnorm(dor_antes)
+qqline(dor_antes, col = "red")
+```
+
+## Interprete a simetria (ou não) dos intervalos de confiança com bootstrapping e sem bootstrapping
+
+```{r}
+
+
+# Definir número de amostras
+n <- 15
+
+# Cálculo do intervalo de confiança tradicional para "dor_antes"
+t_valor <- qt(0.975, df = n-1)
+media_original <- mean(dor_antes)
+sd_original <- sd(dor_antes)
+erro_padrao <- sd_original / sqrt(n)
+IC_95_tradicional <- media_original + c(-1, 1) * t_valor * erro_padrao
+
+# Cálculo do intervalo de confiança tradicional para "dor_depois"
+media_depois <- mean(dor_depois)
+sd_original_depois <- sd(dor_depois)
+erro_padrao_depois <- sd_original_depois / sqrt(n)
+IC_95_tradicional_depois <- media_depois + c(-1, 1) * t_valor * erro_padrao_depois
+
+cat("Intervalo de confiança tradicional para 'dor_antes' de 95%:", IC_95_tradicional, "\n")
+cat("Intervalo de confiança tradicional para 'dor_depois' de 95%:", IC_95_tradicional_depois, "\n")
+
+# Bootstrapping para IC de "dor_antes"
+set.seed(123)
+n_bootstrap <- 1000
+media_reamostradas <- replicate(n_bootstrap, {
+  amostra_reamostrada <- sample(dor_antes, size = n, replace = TRUE)
+  mean(amostra_reamostrada)
+})
+
+IC_95_bootstrap <- quantile(media_reamostradas, c(0.025, 0.975))
+
+cat("Intervalo de confiança de bootstrapping para 'dor_antes' de 95%:", IC_95_bootstrap, "\n")
+
+# Bootstrapping para IC de "dor_depois"
+set.seed(123)
+n_bootstrap <- 1000
+media_reamostradas <- replicate(n_bootstrap, {
+  amostra_reamostrada <- sample(dor_depois, size = n, replace = TRUE)
+  mean(amostra_reamostrada)
+})
+
+IC_95_bootstrap_depois <- quantile(media_reamostradas, c(0.025, 0.975))
+cat("Intervalo de confiança de bootstrapping para 'dor_depois' de 95%:", IC_95_bootstrap_depois, "\n")
+
+
+```
+
+## Aplique um teste não-paramétrico adequado para a seguinte situação e explique o resultado.
+
+You can also embed plots, for example:
+
+```{r}
+# Executar o Teste de Soma de Postos de Wilcoxon (também conhecido como Teste de Mann-Whitney)
+resultado_wilcox <- wilcox.test(dor_antes, dor_depois, paired = TRUE, alternative = "two.sided")
+
+resultado_wilcox
+
+
+```
+Hipótese Nula : Não há diferença significativa entre a intensidade da dor antes e depois do tratamento.
+Hipótese Alternativa : Existe uma diferença significativa entre a intensidade da dor antes e depois do tratamento.
+
+
+## Aplique um teste não-paramétrico adequado para a seguinte situação e explique o resultado.
+Um nutricionista quer comparar os efeitos de duas dietas diferentes, Dieta A e Dieta B, na perda de peso. Dois grupos de indivíduos, um seguindo a Dieta A e o outro seguindo a Dieta B, foram monitorados durante três
+
+Grupo 1 (Dieta A): Perda de peso (em quilogramas) de 10 indivíduos após três meses.
+Grupo 2 (Dieta B): Perda de peso de 10 outros indivíduos após três meses.
+
+```{r}
+peso_perdido_A <- c(3, 4.5, 2, 5, 3.5, 2.5, 4, 5, 6, 4.5)  # Dieta A
+peso_perdido_B <- c(5, 3.5, 4, 4.5, 3, 4.5, 5, 6.5, 7, 5.5)  # Dieta B
+
+```
+
+
+### Objetivo: Determinar se há uma diferença significativa na mediana da perda de peso entre os dois grupos de dieta.
+
+### Hipótese Nula (H0): Não há diferença na mediana da perda de peso entre os grupos Dieta A e Dieta B.
+
+### Hipótese Alternativa (H1): Há uma diferença na mediana da perda de peso entre os grupos Dieta A e Dieta B.
+
+
+You can also embed plots, for example:
+
+```{r}
+
+resultado_wilcox_exercicio <- wilcox.test(peso_perdido_A, peso_perdido_B, paired = TRUE, alternative = "two.sided")
+
+resultado_wilcox_exercicio
+
+```
+
+Hipótese Nula : Não há diferença significativa entre peso perdido A e B.
+Hipótese Alternativa : Existe uma diferença significativa entre a o peso perdido A e o peso B.
+
