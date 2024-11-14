@@ -1,0 +1,220 @@
+---
+title: "trabalho 8"
+author: "higor lucas de Araujo Freitas"
+date: "2024-10-15"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Enunciado
+
+Em um estudo sobre hábitos alimentares, os pesquisadores investigaram seis dietas diferentes e seus efeitos sobre a perda de peso, com dois grupos principais de dietas:
+1.**Dietas com Baixo Teor de Carboidratos:**
+  - Dieta Cetogênica
+  - Dieta Atkins
+  - Dieta Paleo
+  
+2.**Dietas com Baixo Teor de Gorduras:**
+  - Dieta Vegetariana
+  - Dieta Mediterrânea
+  - Dieta DASH
+  
+Cada dieta foi aplicada a 12 indivíduos, e a perda de peso (em kg) foi medida após 3 meses. O objetivo da análise é:
+
+```{r cars}
+dados <- data.frame( Dieta = rep(c("Cetogenica", "Atkins", "Paleo", "Vegetariana", "Mediterranea", "DASH"), each = 12), 
+                     Perda_Peso = c(8.5, 7.9, 8.2, 9.0, 8.8, 8.6, 8.7, 9.1, 8.9, 9.2, 9.0, 9.3, 
+7.5, 7.8, 7.7, 8.1, 7.9, 7.6, 7.4, 7.5, 7.8, 7.7, 7.9, 7.6, 
+ 9.1, 9.2, 9.0, 9.3, 9.4, 9.1, 9.3, 9.2, 9.0, 9.4, 9.5, 9.1, 
+ 6.1, 6.3, 6.5, 6.7, 6.6, 6.4, 6.2, 6.8, 6.9, 6.5, 6.7, 6.6, 
+ 7.0, 7.2, 7.1, 7.5, 7.3, 7.4, 7.2, 7.1, 7.3, 7.5, 7.2, 7.4,  
+ 6.2, 6.0, 5.9, 6.1, 6.3, 6.1, 6.4, 6.5, 6.3, 6.4, 6.0, 6.2)) 
+
+```
+
+1. Verificar se as suposições de normalidade e homogeneidade de variância são atendidas.
+```{r}
+
+```
+
+```{r}
+
+# Definir a ordem dos fatores
+dados$Dieta <- factor(dados$Dieta, 
+                                 levels = c("Cetogenica", "Atkins", "Paleo", "Vegetariana", "Mediterranea", "DASH"))
+
+# Mostrar os níveis do fator
+levels(dados$Dieta)
+
+# Ajustar o modelo ANOVA
+anova_model <- aov(Perda_Peso ~ Dieta, data = dados)
+
+# Obter os resíduos
+residuos <- residuals(anova_model)
+
+# Carregar a biblioteca para o teste Anderson-Darling
+library(nortest)
+
+# Teste de normalidade dos resíduos
+ad_test <- ad.test(residuos)
+# Se p-value > 0.05, podemos considerar que os dados seguem uma distribuição normal.
+print(ad_test)
+
+# Carregar a biblioteca car para o teste de Levene
+library(car)
+
+# Teste de Levene para homogeneidade de variância
+homocedasticidade <- leveneTest(Perda_Peso ~ Dieta, data = dados)
+# Se P-value > 0.05 indica que não rejeitamos a hipótese nula. Isso significaria que não há evidências suficientes para afirmar que as variâncias dos grupos são diferentes.
+print(homocedasticidade)
+
+# Executar ANOVA
+anova_summary <- summary(anova_model)
+print(anova_summary)
+
+# Definir os contrastes
+
+# Definir os 5 contrastes
+contraste1 <- c(1, 1, 1, -1, -1, -1)  # Baixo Carboidrato vs Baixo Gordura
+contraste2 <- c(2, -1, -1, 0, 0, 0)   # Cetogênica vs Atkins e Paleo
+contraste3 <- c(0, 0, 0, 2, -1, -1)   # Vegetariana vs Mediterrânea e DASH
+contraste4 <- c(0, 0, 0, 0, 1, -1)    # Mediterrânea vs DASH
+contraste5 <- c(1, 0, 0, -1, 0, 0)    # Cetogênica vs Vegetariana
+
+# Aplicar os contrastes ao modelo
+contrasts(dados$Dieta) <- cbind(contraste1, contraste2, contraste3, contraste4, contraste5)
+
+# Realizar ANOVA com os contrastes definidos
+anova_contrastes <- aov(Perda_Peso ~ Dieta, data = dados)
+
+# Resumo dos resultados da ANOVA com contrastes
+summary(anova_contrastes, split = list(Dieta = list("Carboidratos vs Gorduras" = 1, 
+"Cetogênica vs Outras Carboidratos" = 2, 
+"Vegetariana vs Outras Gorduras" = 3, 
+"Mediterrânea vs DASH" = 4, 
+"Cetogênica vs Vegetariana" = 5)))
+
+# Número de contrastes
+k <- 5
+
+# Obter o número de graus de liberdade residual
+df_residual <- anova_contrastes$df.residual
+
+# Obter as médias dos grupos
+media_cetogenica <- mean(dados$Perda_Peso[dados$Dieta == "Cetogenica"])
+media_atkins <- mean(dados$Perda_Peso[dados$Dieta == "Atkins"])
+media_paleo <- mean(dados$Perda_Peso[dados$Dieta == "Paleo"])
+media_vegetariana <- mean(dados$Perda_Peso[dados$Dieta == "Vegetariana"])
+media_mediterranea <- mean(dados$Perda_Peso[dados$Dieta == "Mediterranea"])
+media_dash <- mean(dados$Perda_Peso[dados$Dieta == "DASH"])
+
+# Calcular as médias dos contrastes
+media_contraste1 <- (media_cetogenica + media_atkins + media_paleo )  - (media_vegetariana + media_mediterranea + media_dash )
+
+media_contraste2 <- media_cetogenica - (media_atkins + media_paleo)
+
+media_contraste3 <- media_vegetariana - (media_mediterranea + media_dash)
+
+media_contraste4 <- media_mediterranea - media_dash
+
+media_contraste5 <- media_cetogenica - media_vegetariana
+
+
+# Calcular o número de observações em cada grupo
+n <- table(dados$Perda_Peso)
+
+# Calcular a soma dos quadrados do modelo para cada contraste
+ssr1 <- (media_contraste1^2) / sum((contraste1^2) / n)
+ssr2 <- (media_contraste2^2) / sum((contraste2^2) / n)
+ssr3 <- (media_contraste3^2) / sum((contraste3^2) / n)
+ssr4 <- (media_contraste4^2) / sum((contraste4^2) / n)
+ssr5 <- (media_contraste5^2) / sum((contraste5^2) / n)
+
+# Extrair o MS residual
+summary_anova <- summary(anova_contrastes)
+ms_residual <- summary_anova[[1]][["Mean Sq"]][2]
+
+# Calcular os valores F para cada contraste
+f_value1 <- ssr1 / ms_residual
+f_value2 <- ssr2 / ms_residual
+f_value3 <- ssr3 / ms_residual
+f_value4 <- ssr4 / ms_residual
+f_value5 <- ssr5 / ms_residual
+
+
+
+# Aplicar correção de Bonferroni ao nível de significância
+alpha <- 0.05 / 4
+
+# Calcular os valores-p associados
+p_value1 <- pf(f_value1, df1 = 1, df2 = df_residual, lower.tail = FALSE)
+p_value2 <- pf(f_value2, df1 = 1, df2 = df_residual, lower.tail = FALSE)
+p_value3 <- pf(f_value3, df1 = 1, df2 = df_residual, lower.tail = FALSE)
+p_value4 <- pf(f_value4, df1 = 1, df2 = df_residual, lower.tail = FALSE)
+p_value5 <- pf(f_value5, df1 = 1, df2 = df_residual, lower.tail = FALSE)
+
+# Exibir os resultados com correção de Bonferroni
+cat("Resultado do contraste 1: p-value =", p_value1, " - Significativo?", p_value1 < alpha, "\n")
+cat("Resultado do contraste 2: p-value =", p_value2, " - Significativo?", p_value2 < alpha, "\n")
+cat("Resultado do contraste 3: p-value =", p_value3, " - Significativo?", p_value3 < alpha, "\n")
+cat("Resultado do contraste 4: p-value =", p_value4, " - Significativo?", p_value4 < alpha, "\n")
+cat("Resultado do contraste 5: p-value =", p_value5, " - Significativo?", p_value5 < alpha, "\n")
+# Usando o Método Scheffé
+
+# Usando o Método Scheffé
+
+library(emmeans)
+em_means <- emmeans(anova_model, "Dieta")
+contrast(em_means, "pairwise", adjust = "scheffe") # Saída Pairwise
+
+
+contraste1 <- c(1, 1, 1, -1, -1, -1)  # Baixo Carboidrato vs Baixo Gordura
+contraste2 <- c(2, -1, -1, 0, 0, 0)   # Cetogênica vs Atkins e Paleo
+contraste3 <- c(0, 0, 0, 2, -1, -1)   # Vegetariana vs Mediterrânea e DASH
+contraste4 <- c(0, 0, 0, 0, 1, -1)    # Mediterrânea vs DASH
+contraste5 <- c(1, 0, 0, -1, 0, 0)    # Cetogênica vs Vegetariana
+# Define contrastes
+contrasts_list <- list(
+"Baixo Carboidrato vs Baixo Gordura" = c(1, 1, 1, -1, -1, -1),
+"Cetogênica vs Atkins e Paleo"  = c(2, -1, -1, 0, 0, 0),
+"Vegetariana vs Mediterrânea e DASH" = c(0, 0, 0, 2, -1, -1),
+"Mediterrânea vs DASH" = c(0, 0, 0, 0, 1, -1),   
+"Cetogênica vs Vegetariana "= c(1, 0, 0, -1, 0, 0)
+)
+
+# Aplica contrastes
+contrast_results <- contrast(em_means, contrasts_list)
+
+print(contrast_results)
+
+
+
+# Teste de Tukey
+tukey_test <- TukeyHSD(anova_model)
+print(tukey_test)
+
+# Visualizar o gráfico de Tukey
+plot(tukey_test)
+
+
+# Teste de Kruskal-Wallis
+kruskal_test <- kruskal.test(Perda_Peso ~ Dieta, data = dados)
+print(kruskal_test)
+
+pairwise.wilcox.test(dados$Perda_Peso, dados$Dieta,
+                 p.adjust.method = "bonferroni")
+
+
+```
+2. Verificar se há diferenças significativas entre os grupos de dietas usando ANOVA.
+3. Crie 5 contrastes que façam sentido
+4. Realizar análise pós-hoc dos contrastes entre os grupos e dentro dos grupos com correção de Bonferroni e teste F.
+5. Realizar análise pelo método de Scheffé (pairwise e contraste)
+6. Realizar o teste de Tukey (pairwise) e intervalos de confiança.
+7. Realizar teste alternativo Kruskal-Wallis e análise pós-hoc pairwise .
+

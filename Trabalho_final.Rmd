@@ -1,0 +1,161 @@
+---
+title: "Trabalho-final"
+author: "higor lucas de Araujo Freitas"
+date: "2024-11-14"
+output: html_document
+---
+
+## Import csv
+```{r}
+ dados_imoveis <- read.csv("/home/higorlucas/Downloads/dados_imoveis.csv")
+```
+
+## R Markdown
+
+Informações dos dados 
+
+Area: Área do imóvel em metros quadrados.
+Quartos: Número de quartos.
+Idade: Idade do imóvel em anos.
+Banheiros: Número de banheiros.
+ProximidadeEscola: Indica se o imóvel está próximo a uma escola (1 = perto, 0 = longe).
+Preco: Preço de venda do imóvel em reais.
+
+
+Objetivo: Construa um modelo de regressão linear múltipla para prever o preço de venda (Preco) com base nas outras variáveis.
+
+```{r}
+
+modelo <- lm(Preco ~., data=dados_imoveis)
+
+summary(modelo)
+
+par(mfrow = c(2, 2))
+plot(modelo)
+
+```
+
+### Tarefas:
+
+Carregue o conjunto de dados para o R.
+Explore os dados utilizando estatísticas descritivas e visualizações.
+```{r}
+
+# Estatísticas descritivas básicas para todas as variáveis do conjunto de dados
+summary(dados_imoveis)
+
+# Carregar o pacote
+library(psych)
+
+# Estatísticas descritivas detalhadas
+describe(dados_imoveis)
+```
+
+```{r}
+# Histograma para a variável de resposta (Preco)
+hist(dados_imoveis$Preco, main = "Distribuição de Preço dos Imóveis", xlab = "Preço", col = "skyblue", border = "white")
+
+# Histograma para a área dos imóveis
+hist(dados_imoveis$Area, main = "Distribuição da Área dos Imóveis", xlab = "Área", col = "lightgreen", border = "white")
+
+# Boxplot para verificar a distribuição de Quartos
+boxplot(dados_imoveis$Quartos, main = "Distribuição do Número de Quartos", ylab = "Quartos", col = "lightblue")
+
+# Boxplot para verificar a distribuição de Banheiros
+boxplot(dados_imoveis$Banheiros, main = "Distribuição do Número de Banheiros", ylab = "Banheiros", col = "lightcoral")
+
+```
+
+
+```{r}
+# Instalar o pacote corrplot se ainda não estiver instalado
+# install.packages("corrplot")
+
+# Carregar o pacote corrplot
+library(corrplot)
+
+# Matriz de correlação entre variáveis numéricas
+correlacao <- cor(dados_imoveis[, sapply(dados_imoveis, is.numeric)])
+corrplot(correlacao, method = "color", tl.cex = 0.8, addCoef.col = "black", number.cex = 0.7)
+
+```
+
+
+```{r}
+# Carregar o pacote
+library(car)
+
+# Criar o gráfico Q-Q plot dos resíduos do modelo
+qqPlot(modelo, main = "Q-Q Plot dos Resíduos do Modelo")
+
+```
+
+```{r}
+# Calcular o VIF para o modelo
+vif_valores <- vif(modelo)
+
+# Exibir os valores de VIF
+print(vif_valores)
+```
+
+Crie um modelo de regressão linear múltipla usando Preco como a variável dependente e as outras variáveis como independentes.
+Avalie o ajuste do modelo e interprete os coeficientes das variáveis.
+Faça previsões usando o modelo para novos imóveis e avalie a precisão dessas previsões.
+
+```{r}
+# Gráfico de resíduos vs valores ajustados
+plot(modelo$fitted.values, residuals(modelo), main = "Resíduos vs. Valores Ajustados",
+     xlab = "Valores Ajustados", ylab = "Resíduos", pch = 19, col = "blue")
+abline(h = 0, col = "red")
+
+```
+
+
+```{r}
+
+# Definir o número de observações
+n <- 100
+
+# Gerar dados aleatórios conforme os intervalos especificados
+set.seed(123) 
+
+# Variáveis
+Area <- runif(n, min = 45, max = 300)                  # Área de 45 a 300 m²
+Quartos <- sample(1:4, n, replace = TRUE)               # Quartos de 1 a 4
+Idade <- sample(0:80, n, replace = TRUE)                # Idade de 0 a 80 anos
+Banheiros <- sample(1:4, n, replace = TRUE)             # Banheiros de 1 a 4
+ProximidadeEscola <- sample(0:1, n, replace = TRUE)     # Proximidade a escola: 0 ou 1
+Preco <- runif(n, min = 102500, max = 2000000)          # Preço de 102500 a 2000000
+
+# Criar o data frame com as variáveis
+dados_teste <- data.frame(Area, Quartos, Idade, Banheiros, ProximidadeEscola, Preco)
+
+# Visualizar os primeiros registros
+head(dados_teste)
+
+# Comparar previsões com valores reais (substitua "dados_teste" e "Preco_real")
+previsoes_teste <- predict(modelo, newdata = dados_teste)
+mae <- mean(abs(previsoes_teste - dados_teste$Preco))
+rmse <- sqrt(mean((previsoes_teste - dados_teste$Preco)^2))
+
+cat("MAE:", mae, "\n")
+cat("RMSE:", rmse, "\n")
+
+
+
+```
+
+### Interpretação dos resultados:
+
+Resumo do modelo (summary(modelo)): Esta função fornece um resumo do seu modelo de regressão, incluindo os coeficientes de cada variável independente, os valores de t (e os p-valores associados), e o R² do modelo.
+
+Coeficientes (Intercepto e variáveis): Representam a mudança esperada no preço de venda (variável dependente) para uma unidade de mudança na variável independente, mantendo as outras constantes. Se o p-valor associado a um coeficiente é menor que 0.05, geralmente consideramos que há uma associação estatisticamente significativa.
+R²: Indica a proporção da variação na variável dependente explicada pelo modelo. Valores mais altos indicam um melhor ajuste do modelo aos dados.
+Q-Q Plot dos resíduos (qqPlot(modelo)): Este gráfico ajuda a verificar se os resíduos do modelo estão aproximadamente normalmente distribuídos - uma suposição importante na regressão linear. Se os pontos seguem aproximadamente a linha referencial, isso sugere que os resíduos são normalmente distribuídos.
+
+Fator de Inflação da Variância (VIF) (vif(modelo)): Avalia se há multicolinearidade entre as variáveis independentes. Valores de VIF superiores a 5 (ou, em regras mais rigorosas, superiores a 10) podem indicar um problema de multicolinearidade, sugerindo que as variáveis independentes estão altamente correlacionadas entre si.
+
+### Interpretação geral:
+
+Se uma variável tem um coeficiente significativo (com base no p-valor), isso indica que ela tem um impacto estatisticamente significativo no preço dos imóveis.
+O modelo deve ser interpretado com cautela se houver evidências de não normalidade nos resíduos ou se houver multicolinearidade significativa entre as variáveis independentes
